@@ -6,10 +6,10 @@ const mergePDFs = async (files) => {
 
   for (let file of files) {
     console.log("Adding:", file.path);
-    await merger.add(file.path);   // 🔥 direct use
+    await merger.add(file.path);   
   }
 
-  const outputPath = `merged-${Date.now()}.pdf`;  // 🔥 unique file
+  const outputPath = `merged-${Date.now()}.pdf`;  
 
   await merger.save(outputPath);
 
