@@ -1,0 +1,154 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <title>PDFx - PDF Merger</title>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      min-height: 100vh;
+    }
+
+    .card {
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .navbar {
+      background: rgba(197, 193, 193, 0.9);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-primary {
+      border-radius: 10px;
+    }
+
+    .list-group-item {
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+
+<nav class="navbar navbar-expand-lg">
+  <a class="navbar-brand font-weight-bold" href="#">📄 PDFx</a>
+
+  <div class="ml-auto">
+    <a href="#" class="btn btn-outline-dark mr-2">Home</a>
+    <a href="#" class="btn btn-outline-dark">About</a>
+  </div>
+</nav>
+
+
+<div class="container d-flex justify-content-center align-items-center" style="height: 85vh;">
+  <div class="card p-5 col-md-6 text-center">
+
+    <h2 class="mb-3">Merge Your PDFs Easily </h2>
+    <p class="text-muted">Upload multiple PDFs and merge them instantly</p>
+
+    
+    <form onsubmit="return false;">
+
+      
+      <input type="file" id="fileInput" class="form-control-file mt-3" multiple accept="application/pdf">
+
+      
+      <ul id="fileList" class="list-group mt-4 text-left"></ul>
+
+      
+      <button type="button" class="btn btn-primary btn-block mt-4" onclick="submitFiles()">
+        Merge & Download PDF 🔥
+      </button>
+
+    </form>
+
+  </div>
+</div>
+
+
+
+<script>
+
+let selectedFiles = [];
+
+
+document.getElementById("fileInput").addEventListener("change", function(e) {
+  selectedFiles = Array.from(e.target.files);
+  showFiles();
+});
+
+
+function showFiles() {
+  let list = document.getElementById("fileList");
+  list.innerHTML = "";
+
+  selectedFiles.forEach((file, index) => {
+    let li = document.createElement("li");
+    li.className = "list-group-item d-flex justify-content-between align-items-center";
+
+    li.innerHTML = `
+      <span>📄 ${file.name}</span>
+      <button class="btn btn-sm btn-danger" onclick="removeFile(${index})">❌</button>
+    `;
+
+    list.appendChild(li);
+  });
+}
+
+
+function removeFile(index) {
+  selectedFiles.splice(index, 1);
+  showFiles();
+}
+
+
+function submitFiles() {
+  if (selectedFiles.length === 0) {
+    alert("Please select PDF files ❌");
+    return;
+  }
+
+  const formData = new FormData();
+
+  selectedFiles.forEach(file => {
+    formData.append("pdfsFiles", file, file.name);
+  });
+
+  fetch("/merge", {
+  method: "POST",
+  body: formData
+})
+.then(res => res.arrayBuffer())   // ✅ FIX
+.then(data => {
+  const blob = new Blob([data], { type: "application/pdf" });
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "merged.pdf";
+  a.click();
+})
+.catch(err => {
+  console.error(err);
+  alert("Error merging PDF ❌");
+});
+}
+
+</script>
+
+</body>
+</html>
